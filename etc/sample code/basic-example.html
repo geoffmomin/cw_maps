@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?v=3.6&sensor=false"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
+        <script src="js/underscore-min.js"></script>
+        <script src="js/cwmap.js"></script>
+    </head>
+    <body>
+        <div id="map" style="width: 900px; height: 600px;">
+            loading...
+        </div>
+        <script type="text/javascript">
+            $(function() {
+                projects = [
+                    { id: 3474, latitude: 0, longitude: 0 },
+                    { id: 3474, latitude: 10, longitude: 10 },
+                    { id: 3474, latitude: 20, longitude: 20 },
+                    { id: 3474, latitude: 30, longitude: 30 },
+                    { id: 3474, latitude: 40, longitude: 40 },
+                ];
+                cwmap = new CWMAP();
+                cwmap.init(
+                    'map', // mapdiv
+                    projects, // projects
+                    $(location).attr('hash').replace(/^#/, ''), // search_id
+                    [], // search_term
+                    [CWMAP.share_button, CWMAP.fullscreen_button, CWMAP.search, CWMAP.infobar], // exclude_controls
+                    [CWMAP.do_not_auto_submit, CWMAP.do_not_auto_open_infowindows/* , CWMAP.disable_infowindows */], // functionality
+                    "http://maps.charitywater.org/", // base_url
+                    {}, // override_selectors
+                    function() {} // after load method
+                    );
+
+                /* And for reference, here are all of the exclude_controls and functionality options:
+                    // Constants used to show/hide controls
+                    CWMAP.share_button = 'share';
+                    CWMAP.fullscreen_button = 'fullscreen';
+                    CWMAP.map_button = 'map';
+                    CWMAP.satellite_button = 'satellite';
+                    CWMAP.zoom_button = 'zoom';
+                    CWMAP.search = 'search';
+                    CWMAP.infobar = 'infobar';
+
+                    // Constants used to control functionality
+                    CWMAP.disable_infowindows = 'disable_infowindows';
+                    CWMAP.do_not_auto_submit = 'do_not_auto_submit';
+                    CWMAP.do_not_auto_zoom = 'do_not_auto_zoom';
+                    CWMAP.do_not_auto_open_infowindows = 'do_not_auto_open_infowindows';
+                    CWMAP.auto_fullscreen = 'auto_fullscreen';
+                    CWMAP.rig_map = 'rig_map';
+                    CWMAP.year_filter_map_controls = 'year_filter_map_controls';
+                    CWMAP.standard_controls = 'standard_controls';
+                */
+            });
+        </script>
+    </body>
+</html>
+

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<link rel="stylesheet" href="jquery-ui-1.10.2.custom.css"/>
+<link rel="stylesheet" href="style.css"/>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script src="util.js"></script>
+<script>
+  function water(data) {
+    window.fieldNames = {};
+    for (var i = 0, j = data[0].length; i < j; ++i) {
+      window.fieldNames[data[0][i]] = i;
+    }
+    var newData = []; 
+    for (var i = 0, j = data.length; i < j; i++) {
+      if (Math.abs(data[i][window.fieldNames.lat] || 0) < 0.01 || Math.abs(data[i][window.fieldNames.latitude] || 0) < 0.01) {
+        console.log(i);
+	continue;
+      }
+      if (i % 2 == 0)
+        continue; 
+      newData.push(data[i]);
+    }
+    data = newData;
+    window.data = data
+  }
+
+</script>
+<script src="../etc/data/first_5000_data_points_compact.json.old"></script>
+<script src="map_style.js"></script>
+
+<script>
+  var map;
+  var polylines = [];
+  var visibleIndexes = [];
+  var f_lat = window.fieldNames.lat;
+  var f_lon = window.fieldNames.lon;
+  var t_lat = window.fieldNames.latitude;
+  var t_lon = window.fieldNames.longitude;
+  var donation_date = window.fieldNames.create_dttm;
+  var dollars = window.fieldNames.donation_amount_contributed;
+  var filters = getUrlVars();
+
+  // to keep track of the visible polylines
+  // end_index will be lower! than start_index
+  var start_index;
+  var end_index;
+
+  // TEMPORARY! data sort, remove when we have real data.
+  data = data.slice(1).sort(function(a, b) {
+    return a[donation_date] - b[donation_date];
+  });
+
+  // var range = parseInt(getParameterByName('range'));
+  var range = 60*60*24*3;
+  var first_timestamp = data[0][donation_date];
+  var last_timestamp = data[data.length-1][donation_date];
+  var current_timestamp = first_timestamp;
+  displayCurrentDate();
+
+function initialize() {
+  map = new google.maps.Map(document.getElementById('map_canvas'), {
+    center: new google.maps.LatLng(0, 0),
+    zoom: 2,
+    maxZoom: 20,
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    disableDefaultUI: true,
+    zoomControl: true,
+    styles: style
+  });
+
+  createPolylines();
+  displayCurrentDate();
+}
+
+function createPolylines() {
+  start_index = data.binarySearch(current_timestamp, donation_date);
+  for (var i = start_index, j = 0; i >= j; i--) {
+    if (data[i][donation_date] < current_timestamp - range) {
+      break;
+    }
+
+    if(!filterCheck(i)) {
+        continue;
+    }
+
+    var path = [
+      new google.maps.LatLng(data[i][f_lat], data[i][f_lon]),
+      new google.maps.LatLng(data[i][t_lat], data[i][t_lon])
+    ];
+
+    if (typeof polylines[i] === "undefined") {
+      polylines[i] = createPolyline(
+        path,
+        Math.log(window.data[i][dollars] + 1)
+      );
+    }
+
+    var opacity = (data[i][donation_date] - (current_timestamp - range))/range;// * 0.5;
+    setLineOpacity(i, opacity);
+  }
+  end_index = i + 1;
+}
+
+function filterCheck(i) {
+    for(field_name in filters) {
+        if(typeof data[i][window.fieldNames[field_name]] !== "undefined") {
+            if(data[i][window.fieldNames[field_name]] != filters[field_name]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function destroyPolylines() {
+  for(i in visibleIndexes) {
+    var j = parseInt(i);
+    if (j > start_index || j < end_index) {
+      setLineOpacity(j, 0);
+      delete visibleIndexes["" + i];
+    }
+  }
+}
+
+function setLineOpacity(i, opacity) {
+  if (opacity >= 0.01) { // && !polylines[i].getVisible()) {
+    visibleIndexes["" + i] = true;
+    polylines[i].setOptions({'strokeOpacity': opacity, 'visible': true});
+  } else {
+    polylines[i].setOptions({'strokeOpacity': opacity, 'visible': false});
+  }
+}
+
+function createPolyline(path, weight) {
+  var line = new google.maps.Polyline({
+    path: path,
+    strokeWeight: weight,
+    visible: false,
+    strokeColor: '#2e9df7',
+    zIndex: 1,
+    geodesic: true,
+    map: map
+  });
+
+  /*
+  google.maps.event.addListener(line, 'click', function(event) {
+    window.alert(water.data[line.index].project_id);
+  });
+
+  google.maps.event.addListener(line, 'mouseover', function() {
+    line.setOptions({
+      strokeWeight: 3,
+      strokeOpacity: 1,
+      strokeColor: '#ff33ff',
+      zIndex: 999
+    });
+  });
+
+  google.maps.event.addListener(line, 'mouseout', function() {
+    line.setOptions({
+      strokeWeight: 1,
+      strokeOpacity: .3,
+      strokeColor: '#33ffff',
+      zIndex: 1
+    });
+  });
+  */
+
+  return line;
+}
+
+// percent should be something like "0.1543"
+function calculateDateFromPercent(percent) {
+  var range_in_seconds = last_timestamp - first_timestamp;
+  var target_second = Math.round(percent * range_in_seconds + first_timestamp);
+  return target_second;
+}
+
+function displayCurrentDate() {
+  var start_date = new Date(current_timestamp * 1000);
+  var end_date = new Date((range + current_timestamp) * 1000);
+  $('#dateDisplay').html(start_date.toLocaleDateString() + " - " + end_date.toLocaleDateString());
+}
+
+</script>
+
+</head>
+
+<body>
+  <div id="map_canvas"></div>
+  <div id="controls">
+    <div id="jq-slider"></div>
+    <button id="play-btn"></button>
+    <button id="pause-btn"></button>
+  </div>
+  <div id="dateDisplay">
+  </div>
+</body>
+<script>
+    $(document).ready(function () {
+        initialize();
+
+        function updateMap (event, ui) {
+            destroyPolylines();
+            var percent = ui.value / $('#jq-slider').slider('option', 'max');
+            current_timestamp = calculateDateFromPercent(percent);
+            displayCurrentDate();
+            createPolylines();
+            return percent;
+        }
+
+        function updateSlider (newVal) {
+            $('#jq-slider').slider('option', 'value', newVal)
+        }
+
+        $('#jq-slider').slider({
+            change: updateMap,
+            slide: updateMap,
+            animate: false
+        });
+
+        $('#play-btn').button({
+            text: false,
+            icons: {primary: 'ui-icon-play'}
+        });
+
+        $('#pause-btn').button({
+            text: false,
+            icons: {primary: 'ui-icon-pause'}
+        });
+
+        window.canPlay = true;
+
+        $('#play-btn').click(function () {
+            console.log(window.canPlay);
+            console.log($('#jq-slider').slider('option', 'value'));
+            var currentVal = $('#jq-slider').slider('option', 'value');
+            console.log(currentVal);
+            var sliderMax = $('#jq-slider').slider('option', 'max');
+
+            if (window.canPlay == true) {
+                if (currentVal >= sliderMax) {
+                    $('#jq-slider').slider('value', 0)
+                    currentVal = 0;
+                }
+                window.intervalId = window.setInterval(function () {
+                    window.canPlay = false;
+                    /*
+                    console.log('currentVal: ' + currentVal);
+                    console.log('canPlay: ' + window.canPlay);
+                    console.log('intervalId: ' + window.intervalId);
+                    */
+                    if (currentVal >= sliderMax) {
+                        window.clearInterval(window.intervalId);
+                        window.canPlay = true;
+                    }
+                    $('#jq-slider').slider('value', currentVal += 1);
+                }, 200);
+            }
+
+        });
+
+        $('#pause-btn').click(function() {
+            window.clearInterval(window.intervalId);
+            window.canPlay = true;
+        });
+    });
+</script>
+</html>

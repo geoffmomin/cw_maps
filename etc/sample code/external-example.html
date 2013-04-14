@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?v=3.6&sensor=false"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
+        <script src="js/underscore-min.js"></script>
+        <script src="js/cwmap.js"></script>
+    </head>
+    <body>
+        <div id="map" style="width: 900px; height: 600px;">
+            loading...
+        </div>
+        <script type="text/javascript">
+            $(function() {
+                cwmap = new CWMAP();
+                cwmap.init(
+                    'map', // mapdiv
+                    [], // projects
+                    $(location).attr('hash').replace(/^#/, ''), // search_id
+                    [], // search_term
+                    [CWMAP.share_button, CWMAP.fullscreen_button, CWMAP.search, CWMAP.infobar], // exclude_controls
+                    [CWMAP.do_not_auto_submit, CWMAP.do_not_auto_open_infowindows/* , CWMAP.disable_infowindows */], // functionality
+                    "http://maps.charitywater.org/", // base_url
+                    {}, // override_selectors
+                    function() {
+                        $.getJSON('../data/projects.json', function(projects) {
+                            cwmap.updateMap(projects);
+                        });
+                    } // after load method
+                );
+
+            });
+        </script>
+    </body>
+</html>
+

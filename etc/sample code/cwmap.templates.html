@@ -1,0 +1,121 @@
+<script id="cwmap_controls_template" type="text/template">
+    <div style="display: none;">
+        <div id="<%= this_cwmap.getId('search_bar') %>" class="clearfix cwmap_search_bar">
+            <form id="<%= this_cwmap.getId('search_form') %>" class="clearfix cwmap_search_form">
+                <label for="<%= this_cwmap.getId('search_input') %>" class="search_input_label">SEARCH THE MAP TO FIND A PROJECT.</label>
+                <input type="text" id="<%= this_cwmap.getId('search_input') %>" name="data[Maps][search]" value="<%= search_term %>" class="cwmap_search_input" autocomplete="off" placeholder="Search by plaque text, village, country, GPS or partner"></input>
+                <input type="hidden" id="<%= this_cwmap.getId('search_rig_map_input') %>" name=data[Maps][rig_map] value = "<%= this_cwmap.rig_map %>"></input>
+                <input type="hidden" id="<%= this_cwmap.getId('search_filter_project_completion_year_input') %>" name=data[Maps][filter_project_completion_year] value = ""></input>
+                <input type="hidden" id="<%= this_cwmap.getId('search_filter_country_id_input') %>" name=data[Maps][filter_country_id] value = ""></input>
+                <input type="hidden" id="<%= this_cwmap.getId('search_id_input') %>" name="data[Maps][search_id]" value="<%= this_cwmap.search_id %>"></input>
+                <div id="<%= this_cwmap.getId('clear_button') %>" class="ir cwmap_button cwmap_clear_button">Clear</div>
+                <div id="<%= this_cwmap.getId('search_button') %>" class="ir cwmap_button cwmap_search_button">Submit</div>
+                <div id="<%= this_cwmap.getId('search_results') %>" class="cwmap_search_results" >SEARCH RESULTS: <span>0</span> <span>PROJECTS FOUND</span></div>
+                <div id="<%= this_cwmap.getId('close_fullscreen_button') %>" class="ir cwmap_button cwmap_close_fullscreen_button" style="display: none;">EXIT FULLSCREEN</div>
+            </form>
+        </div>
+        <div id="<%= this_cwmap.getId('search_bar_spacer') %>" class="cwmap_search_bar_spacer">
+        </div>
+        <div id="<%= this_cwmap.getId('info_bar') %>" class="cwmap_info_bar">
+            <div class="container">
+                <div></div>
+                <dl>
+                    <div class="term"><dd id="<%= this_cwmap.getId('map_stat_projects') %>">&nbsp;</dd><dt>PROJECTS FUNDED TO DATE</dt></div>
+                    <div class="small_term"><dd id="<%= this_cwmap.getId('map_stat_countries') %>">&nbsp;</dd><dt>COUNTRIES</dt></div>
+                    <div class="last_term"><dd id="<%= this_cwmap.getId('map_stat_partners') %>">&nbsp;</dd><dt>LOCAL PARTNERS</dt></div>
+                </dl>
+                <div class="text">
+                    This map is updated regularly by our water program team. As we get completion reports from our partners, we publish them here. This map does not include all water projects charity: water has funded to date because some are still under construction. Learn more about what goes into building water projects <a href="http://support.charitywater.org/forums/20214223-the-work-on-the-ground">here</a>.
+                </div>
+            </div>
+        </div>
+        <div id="<%= this_cwmap.getId('country_filter_map_controls') %>" class="cwmap_country_filter_map_controls">
+            Sort Our Water Projects By Country
+            <hr />
+            <ul>
+                <% /* populated by js */ %>
+            </ul>
+        </div>
+        <div id="<%= this_cwmap.getId('map_controls') %>" class="cwmap_map_controls cwmap_horizontal_map_controls clearfix">
+            <div id="<%= this_cwmap.getId('share_button') %>" class="ir cwmap_button cwmap_share_button" title="Click to share this map.">Share this map</div>
+            <div id="<%= this_cwmap.getId('fullscreen_button') %>" class="ir cwmap_button cwmap_fullscreen_button" title="Click to view this map fullscreen.">Launch Fullscreen</div>
+            <div id="<%= this_cwmap.getId('map_button') %>" class="ir cwmap_button cwmap_map_button" title="Click to view Map imagery.">Map</div>
+            <div id="<%= this_cwmap.getId('satellite_button') %>" class="ir cwmap_button cwmap_satellite_button" title="Click to view Satellite Imagery.">Satellite</div>
+        </div>
+        <div id="<%= this_cwmap.getId('year_filter_map_controls') %>" class="cwmap_map_controls cwmap_horizontal_map_controls clearfix">
+            <div id="<%= this_cwmap.getId('2011_button') %>">2011</div>
+            <div id="<%= this_cwmap.getId('total_years_button') %>" class="cwmap_active_button">Total</div>
+        </div>
+        <div id="<%= this_cwmap.getId('vertical_map_controls') %>" class="cwmap_map_controls cwmap_vertical_map_controls">
+            <div id="<%= this_cwmap.getId('zoom_control_container') %>" class="cwmap_zoom_control_container">
+                <div id="<%= this_cwmap.getId('increase_zoom_control') %>" class="cwmap_button cwmap_increase_zoom_control"></div>
+                <div id="<%= this_cwmap.getId('zoom_control') %>" class="cwmap_zoom_control"></div>
+                <div id="<%= this_cwmap.getId('decrease_zoom_control') %>" class="cwmap_button cwmap_decrease_zoom_control"></div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script id="cwmap_country_filter_li_template" type="text/template">
+    <li data-filter="<%= country_id %>"><%= country_name %></li>
+</script>
+
+<script id="cwmap_share_panel_template" type="text/template">
+    <div style="display: none; margin-top: 8px;" id="<%= this_cwmap.getId('map') %>_share" class="cwmap_share cwmap_map_controls">
+        <label for="<%= this_cwmap.getId('share_map_url') %>" class="share_map_url_label">MAP URL</label>
+        <input type="text" id="<%= this_cwmap.getId('share_map_url') %>" value="<%= share_map_url %>" class="cwmap_share_map_url"></input>
+        <hr />
+        <label for="<%= this_cwmap.getId('share_embed_map') %>" class="share_embed_map_label">EMBED THE MAP WITH CURRENT SEARCH RESULTS.</label>
+        <label class="number" for="<%= this_cwmap.getId('share_embed_map_width') %>">CUSTOM WIDTH (px)</label>
+        <input type="text" id="<%= this_cwmap.getId('share_embed_map_width') %>" value="480" class="cwmap_share_embed_map_width"></input>
+        <label class="number" for="<%= this_cwmap.getId('share_embed_map_height') %>">CUSTOM HEIGHT (px)</label>
+        <input type="text" id="<%= this_cwmap.getId('share_embed_map_height') %>" value="385" class="cwmap_share_embed_map_height"></input>
+        <textarea id="<%= this_cwmap.getId('share_embed_map') %>" >
+            <iframe width="480" height="385" src="<%= this_cwmap.embed_base_url %><%= this_cwmap.search_id %>" frameborder="0"></iframe>
+        </textarea>
+        <a href="javascript: void(0);" class="close">CLOSE</a>
+    </div>
+</script>
+
+<script id="cwmap_autocomplete_header_template" type="text/template">
+    <li class='ui-menuitem' role='menuitem'>
+        <div class='header clearfix'>
+            <span class='column header plaque_text'>Plaque <br />Text</span>
+            <span class='column header community_name'>Community <br/>Name</span>
+            <span class='column header country_name'>Country</span>
+            <span class='column header gps'>GPS</span>
+            <span class='column header partner_name'>Implementing Partner</span>
+        </div>
+    </li>
+</script>
+
+<script id="cwmap_autocomplete_li_template" type="text/template">
+    <li>
+        <a>
+            <% if(typeof item.deployment_code != 'undefined') { %>
+                <div class='item cleafix'>
+                    <span class='column plaque_text'><%= item.plaque_text %> &nbsp; </span>
+                    <span class='column community_name'><%= item.community_name %> &nbsp; </span>
+                    <span class='column country_name'><%= item.country_name %> &nbsp; </span>
+                    <span class='column gps'><%= item.latitude %>, <%= item.longitude %> &nbsp; </span>
+                    <span class='column partner_name'><%= item.partner_name %> &nbsp; </span>
+                </div>
+            <% } else { %>
+                <div class="results_count">
+                    <%= item.label %>
+                </div>
+            <% } %>
+        </a>
+    </li>
+</script>
+
+<script id="cwmap_path_infobox_template" type="text/template">
+    <div class="path_infobox clearfix">
+        <div class="close-button">CLOSE</div>
+        <div class="location"><%= location %></div>
+        <div class="date"><%= date %></div>
+        <div class="days"><%= days %></div>
+        <div class="notes"><%= notes %></div>
+        <span class="arrow"></span>
+    </div>
+</script>
